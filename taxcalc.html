@@ -1,0 +1,394 @@
+<html>
+<body>
+
+<div id="CoreDiv">
+ <!-- May add a new div that will hold a help button on top-->
+<!-- input feilds for user data-->
+<div id="InputDiv">
+
+<!-- User income-->
+  <label for="income">income: </label>
+  <input type="number" min="0" id="income" value="0" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"><br><br>
+  
+  <!-- User 401k deposit-->
+  <label for="age">401k: </label>
+  <input type="number" id="401k"   value="0"  onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"><br><br>
+  
+    <!-- UserTax deductables-->
+  <label for="deduct">Tax deductables: </label>
+  <input type="number" id="deduct"  value="0" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"><br><br>
+  
+   <!-- User IRA contributions-->
+    <label for="duc">IRA contributions: </label>
+  <input type="number" id="ira" value="0" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"><br><br>
+  
+   <!-- User Marital filling status-->
+  <select name="Status" id="status">
+    <option value="1">single / married filing single</option>
+    <option value="3">Head of the house hold</option>
+     <option value="2">married</option>
+  </select>
+
+<button id="mainb" onclick="displayMessage()">Submit</button>
+</div>
+
+<div id="OutputDiv">
+
+ <!-- Table fo the out puts-->
+<table>
+  <tr> <!-- First row-->
+  
+    <th></th>
+     <th>Bracket</th>
+      <th> Percentage</th>
+       <th>Dollar amount</th>
+  </tr>
+  <tr><!-- Second row-->
+    <td>Goverment tax</td>
+    <td><p id="ChartGVB"></p></td>
+    <td><p id="ChartGVP"></p></td>
+    <td><p id="ChartGVD"></p></td>
+  </tr>
+  <tr>  <!-- Third row-->
+    <td>NY State tax</td>
+    <td><p id="ChartSTB"></p></td>
+    <td><p id="ChartSTP"></td>
+    <td><p id="ChartSTD"></td>
+  </tr>
+  <tr><!-- Fourth row-->
+    <td>NY City tax</td>
+    <td><p id="ChartCTB"></td>
+    <td><p id="ChartCTP"></td>
+    <td><p id="ChartCTD"></td>
+  </tr>
+  <tr> <!-- Fifth row-->
+    <td>Total tax</td>
+    <td></td>
+    <td><p id="ChartTTP"></td>
+    <td><p id="ChartTTD"></td>
+  </tr>
+  <tr>  <!-- Sixth row-->
+    <td>Total Amount Kept</td>
+    <td></td>
+    <td><p id="ChartAKP"></td>
+    <td><p id="ChartAKD"></td>
+  </tr>
+  
+</table>
+
+</div>
+  
+  
+</div>
+
+<script>
+var STtax =0; // State owed tax
+var CTtax =0; // City owed tax
+var GVtax =0; // Gov owed tax
+var TOtax =0; // Total owed tax
+
+var STtaxper =0; // State tax percentage
+var CTtaxper =0; // City tax percentage
+var GVtaxper =0; // Gov tax percentage
+var TOtaxper =0; // Total tax percentage
+
+var STbracket =0; // State Tax bracket
+var CTbracket =0;  // City Tax bracket
+var GVbracket =0;  // Gov Tax bracket
+
+var taxableincome =0; // the income after decutalbles
+
+var income=0; // totoal income from the inputdata
+var lost =0; // all the deductables.
+var status = document.getElementById('status').value; // maritalable status
+
+
+ // Federal singel tax bracket
+ var GVStaxB = [];
+  GVStaxB[0] =0;
+ GVStaxB[1] =9950;
+ GVStaxB[2]= 40525;
+ GVStaxB[3]= 86375;
+ GVStaxB[4]= 164925;
+ GVStaxB[5]= 209425;
+ GVStaxB[6]= 523600;
+ 
+ // Federal married tax bracket
+  var GVMtaxB = [];
+  GVMtaxB[0] =0;
+ GVMtaxB[1] =19900;
+ GVMtaxB[2]= 81050;
+ GVMtaxB[3]= 172750;
+ GVMtaxB[4]= 329850;
+ GVMtaxB[5]= 418850;
+ GVMtaxB[6]= 628300;
+
+ // Federal head tax bracket 
+ var GVHtaxB = [];
+  GVHtaxB[0]= 0;
+ GVHtaxB[1] =14200;
+ GVHtaxB[2]= 54200;
+ GVHtaxB[3]= 86350;
+ GVHtaxB[4]= 164900;
+ GVHtaxB[5]= 209400;
+ GVHtaxB[6]= 523600;
+
+ // Federal  tax percentage
+  var GVtaxP = [];
+   GVtaxP[0] = 0;
+ GVtaxP[1] = 0.10;
+ GVtaxP[2]= .12;
+ GVtaxP[3]= .22;
+ GVtaxP[4]= .24;
+ GVtaxP[5]= .32;
+ GVtaxP[6]= .35;
+ GVtaxP[7]= .37;
+ 
+ //nys single tax bracket
+ var STStaxB = [];
+ STStaxB[0]= 0;
+STStaxB[1] =8500 ;
+ STStaxB[2]= 11700;
+ STStaxB[3]= 13900;
+ STStaxB[4]= 21400;
+ STStaxB[5]= 80650;
+ STStaxB[6]= 215400;
+ STStaxB[7]= 1077550;
+  STStaxB[8]= 5000000;
+  STStaxB[9]= 25000000;
+ 
+   //nys married tax bracket
+   var STMtaxB = [];
+  STMtaxB[0]= 0;
+STMtaxB[1] =17150 ;
+ STMtaxB[2]= 23600;
+ STMtaxB[3]= 27900;
+ STMtaxB[4]= 43000;
+ STMtaxB[5]= 161550;
+ STMtaxB[6]= 323200;
+ STMtaxB[7]= 2155350;
+  STMtaxB[8]= 5000000;
+  STMtaxB[9]= 25000000;
+
+   //nys head tax bracket
+   var STHtaxB = [];
+  STHtaxB[0]=0 ;
+STHtaxB[1] = 12800;
+ STHtaxB[2]= 17650;
+ STHtaxB[3]= 20900;
+ STHtaxB[4]= 32200;
+ STHtaxB[5]=107650 ;
+ STHtaxB[6]= 269300;
+ STHtaxB[7]= 1616450;
+  STHtaxB[8]=5000000 ;
+  STHtaxB[9]=25000000 ;
+
+ //nys  tax percentage
+ var STtaxP = [];
+ STtaxP[0] =0;
+  STtaxP[1] =.04;
+ STtaxP[2]= .045;
+ STtaxP[3]= .0525;
+ STtaxP[4]= .059;
+ STtaxP[5]= .0597;
+ STtaxP[6]= .0633;
+ STtaxP[7]= .0685;
+  STtaxP[8]= .0965;
+  STtaxP[9]= .1030;
+  STtaxP[10]= .1090;
+  
+  //nyc single tax brackets
+    var CTStaxB = [];
+  CTStaxB[0]= 0;
+ CTStaxB[1] =12000;
+ CTStaxB[2]= 25000;
+ CTStaxB[3]= 50000;
+
+   //nyc married tax brackets
+ var CTMtaxB = [];
+  CTMtaxB[0]= 0;
+ CTMtaxB[1] =21600;
+ CTMtaxB[2]= 45000;
+ CTMtaxB[3]= 90000;
+
+   //nyc head tax brackets
+ var CTHtaxB = [];
+  CTHtaxB[0]= 0;
+ CTHtaxB[1] =14400;
+ CTHtaxB[2]= 30000;
+ CTHtaxB[3]= 60000;
+
+  
+    //nyc  tax percentage
+   var CTtaxP = [];
+    CTtaxP[0]= 0;
+ CTtaxP[1] =.03078;
+ CTtaxP[2]= .03762;
+ CTtaxP[3]= .03819;
+ CTtaxP[4]= .03867;
+
+ //prints out the ouput to the screen.
+function displayMessage(){
+
+//get user information from the feilds
+//gets income
+income = document.getElementById("income").value;
+
+//get marital status
+status =document.getElementById('status').value;
+
+// get total tax decutable
+lost =parseInt ( document.getElementById("401k").value) +  parseInt (document.getElementById("deduct").value) + parseInt ( document.getElementById("ira").value );
+
+// resets the total tax amount
+TOtax =0;
+
+// callculate the the income that can be taxed
+ taxableincome = (income - lost);
+
+
+//check which function to used bade pn maritable status
+    if (status ==3){// head of house hold
+    GVtaxcal(GVHtaxB,GVtaxP);
+       STtaxcal(STHtaxB,STtaxP);
+         CTtaxcal(CTHtaxB,CTtaxP);
+         
+    }else if(status ==2){// married
+    GVtaxcal(GVMtaxB,GVtaxP);
+       STtaxcal(STMtaxB,STtaxP);
+         CTtaxcal(CTMtaxB,CTtaxP);
+         
+    } else{// single
+    GVtaxcal(GVStaxB,GVtaxP);
+       STtaxcal(STStaxB,STtaxP);
+         CTtaxcal(CTStaxB,CTtaxP);
+    
+    }
+    
+    //calculate total tax by adding city, state, and federal tax
+   TOtax =(GVtax + STtax + CTtax);
+   
+
+  
+  
+document.getElementById('ChartGVB').innerHTML =( GVbracket);
+document.getElementById('ChartGVP').innerHTML =( GVtax/taxableincome).toFixed(4);
+document.getElementById('ChartGVD').innerHTML =( GVtax).toFixed(2);
+   
+document.getElementById('ChartSTB').innerHTML =( STbracket);
+document.getElementById('ChartSTP').innerHTML =( STtax/taxableincome).toFixed(4);
+document.getElementById('ChartSTD').innerHTML =( STtax).toFixed(2);
+        
+document.getElementById('ChartCTB').innerHTML =( CTbracket);
+document.getElementById('ChartCTP').innerHTML =( CTtax /taxableincome).toFixed(4);
+document.getElementById('ChartCTD').innerHTML =( CTtax).toFixed(2);
+              
+document.getElementById('ChartTTP').innerHTML =( ( TOtax /taxableincome).toFixed(4));
+document.getElementById('ChartTTD').innerHTML =( TOtax).toFixed(2);
+                
+document.getElementById('ChartAKP').innerHTML =( (1-( TOtax /taxableincome)).toFixed(4));
+document.getElementById('ChartAKD').innerHTML =( (taxableincome -TOtax) .toFixed(2));
+   
+
+}
+// function that callculate federal tax rate. (gov tax braket array , (gov tax percentage array )
+function GVtaxcal(taxb,taxp){
+ //reset starting values
+ GVtax =0;
+  GVtaxper =0;
+  GVbracket =0;
+  
+  // loops through all tax bracket untill it find the one it falls under
+for (var i = 0; i < taxb.length; i++) {
+if(taxableincome < taxb[i]){ // find correct tax bracket
+ GVtax = (taxableincome - taxb[i-1]) *taxp[i] + pretaxcal(taxb,taxp,i); // sets tax owed, adds lower tax brackets with a function
+    GVtaxper = taxp[i]; //sets tax percentage
+    GVbracket =i; // sets tax bracket
+      i = taxb.length+1; // breaks the loop
+ }
+}
+// calculat tax for the highest tax bracket
+if(taxableincome > taxb[taxb.length-1]){
+ GVtax = (taxableincome - taxb[taxb.length-1]) *taxp[ taxp.length-1]  + pretaxcal(taxb,taxp,length-1);// sets tax owed, adds lower tax brackets with a function
+    GVtaxper = taxp[ taxp.length-1]; //sets tax percentage
+    GVbracket = taxp.length-1; // sets tax bracket
+ }
+}
+
+// function that callculate State tax rate. (State tax braket array 
+//, (state tax percentage array )
+function STtaxcal(taxb,taxp){
+ //reset starting values
+STtax =0;
+STtaxper =0;
+STbracket =0;
+
+ // loops through all tax bracket untill it find the one it falls under
+for (var i = 0; i < taxb.length; i++) { 
+if(taxableincome < taxb[i]){ // find correct tax bracket
+ STtax = (taxableincome - taxb[i-1]) *taxp[i] + pretaxcal(taxb,taxp,i); // sets tax owed, adds lower tax brackets with a pretaxcal function
+  
+     STtaxper = taxp[i]; //sets tax percentage
+    STbracket =i;  // sets tax bracket
+      i = taxb.length+1;  // breaks the loop
+ }
+}
+// calculat tax for the highest tax bracket
+if(taxableincome > taxb[taxb.length-1]){
+ STtax = (taxableincome - taxb[taxb.length-1]) *taxp[ taxp.length-1]; // sets tax owed, adds lower tax brackets with pretaxcal function
+    STtaxper = taxp[ taxp.length-1]; //sets tax percentage
+    STbracket = taxp.length-1; // sets tax bracket
+
+ }
+}
+
+// function that callculate City tax rate. (City tax braket array 
+//, (City tax percentage array )
+function CTtaxcal(taxb,taxp){
+//reset starting values
+CTtax =0;
+CTtaxper =0;
+CTbracket =0;
+
+// loops through all tax bracket untill it find the one it falls under
+for (var i = 0; i < taxb.length; i++) { 
+if(taxableincome < taxb[i]){// find correct tax bracket
+ CTtax = (taxableincome - taxb[i-1]) *taxp[i] + pretaxcal(taxb,taxp,i); // sets tax owed, adds lower tax brackets with a pretaxcal function
+   
+    CTtaxper = taxp[i]; //sets tax percentage
+    CTbracket =i; // sets tax bracket
+      i = taxb.length+1;  // breaks the loop
+ }
+}
+// calculat tax for the highest tax bracket
+if(taxableincome > taxb[taxb.length-1]){
+ CTtax = (taxableincome - taxb[taxb.length-1]) *taxp[ taxp.length-1]; // sets tax owed, adds lower tax brackets with pretaxcal function
+    CTtaxper = taxp[ taxp.length-1]; //sets tax percentage
+    CTbracket = taxp.length-1; // sets tax bracket
+ }
+}
+
+// calculate the tax need from the lower brakets
+//, type of tax brackets, type of tax perentage, the bracke the tax fall in -1
+function pretaxcal(taxb , taxp, i){
+var temp =0;
+//loops through the lower brackets
+for (var j = 0; j < i; j++) {
+temp = (taxb[j] * taxp[j])+temp; // adds all the brackets toaol tax  together
+}
+
+return temp; // gives the lower tax brackets value
+ 
+}
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+

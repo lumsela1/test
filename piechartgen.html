@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<body>
+
+
+<label for="income">income: </label>
+<input type="number" min="0" id="income" placeholder="0" onkeypress="return (event.charCode !=8 && 
+event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"><br><br>
+
+
+<label for="saving">saving: </label>
+<input type="number" min="0" id="saving" placeholder="0" onkeypress="return (event.charCode !=8 && 
+event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"><br><br>
+
+
+<label for="investing">investing: </label>
+<input type="number" min="0" id="investing" placeholder="0" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"><br><br>
+
+
+<label for="want">want: </label>
+<input type="number" min="0" id="want" placeholder="0" onkeypress="return (event.charCode !=8 && 
+event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"><br><br>
+
+<label for="need">need: </label>
+<input type="number" min="0" id="need" placeholder="0" onkeypress="return (event.charCode !=8 && 
+event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"><br><br>
+  
+  <button id="mainb" onclick="displayMessage()">Submit</button>
+  
+   <p id="error">ww</p>   
+</div>
+  
+<div id="piechart"></div>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<script type="text/javascript">
+// Load google charts
+google.charts.load('current', {'packages':['corechart']});
+google.charts.setOnLoadCallback(drawChart);
+
+// Draw the chart and set the chart values
+ // var dog = ;
+   var saving = 0;
+   var investing = 0;
+   var want = 0;
+   var need = 0;
+   var unacconted = 0;
+    var empty = 1;
+function drawChart() {
+  var data = google.visualization.arrayToDataTable([
+  ['Task', 'Hours per Day'],
+  ['saving', saving],
+  ['investing', investing],
+  ['want', want],
+  ['need', need],
+  ['unacconted', unacconted],
+   ['Empty', empty]
+]);
+
+  // Optional; add a title and set the width and height of the chart
+  var options = {'title':'My Average Day', 'width':550, 'height':400};
+
+  // Display the chart inside the <div> element with id="piechart"
+  var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+  chart.draw(data, options);
+}
+
+function displayMessage() {
+
+
+if (parseInt(document.getElementById("income").value)> 0){
+income = parseInt(document.getElementById("income").value);
+} else {
+income = 0;
+}
+
+if (parseInt(document.getElementById("saving").value)> 0){
+saving = parseInt(document.getElementById("saving").value);
+} else {
+saving = 0;
+}
+
+if (parseInt(document.getElementById("investing").value)> 0){
+investing = parseInt(document.getElementById("investing").value);
+} else {
+investing = 0;
+}
+
+if (parseInt(document.getElementById("want").value)> 0){
+want = parseInt(document.getElementById("want").value);
+} else {
+want = 0;
+}
+
+
+if (parseInt(document.getElementById("need").value)> 0){
+need = parseInt(document.getElementById("need").value);
+} else {
+need = 0;
+}
+
+unacconted = income - (saving + investing +want + need );
+if (unacconted < 0){
+
+unacconted=0;
+ document.getElementById('error').innerHTML =("ERROR: Income is too low based on other feilds"); 
+} else{
+unacconted = income - (saving + investing +want + need );
+ document.getElementById('error').innerHTML =(""); 
+}
+if ((saving + investing +want + need)> 0){
+empty =0;
+}
+drawChart() ;
+}
+</script>
+
+</body>
+</html>
